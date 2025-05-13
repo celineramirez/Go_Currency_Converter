@@ -7,6 +7,14 @@ import (
 	"os"
 )
 
+var (
+	base	 	string
+	convert		string
+	rateFrom	int
+	rateTo		int
+	converted	int
+)
+
 func main() {
 	apiKey := os.Getenv("CURRENCY_CONV_API_KEY")
 	
