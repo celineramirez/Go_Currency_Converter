@@ -1,6 +1,8 @@
 package main
+
 import (
 	"fmt"
+	"strconv"
 	// "net/http"
 	"github.com/charmbracelet/huh"
 	// "encoding/json"
@@ -27,10 +29,9 @@ func main() {
                 huh.NewOption("GBP", "gbp"),
                 huh.NewOption("EUR", "eur"),
                 huh.NewOption("JPY", "jpy"),
-            ).
+            ).	
 		Value(&base),
 		),
-	)
 
 	huh.NewGroup(
 	huh.NewSelect[string]().
@@ -41,18 +42,30 @@ func main() {
 			huh.NewOption("EUR", "eur"),
 			huh.NewOption("JPY", "jpy"),
 		).
-	Value(&convertTo),
+	Validate(func(x string) error {
+			if x == base {
+				return errors.New("Cannot choose the same currency you are converting from")
+			}
 
+			return nil
+		}).
+	Value(&convertTo),
+	),
+
+	huh.NewGroup(
 	huh.NewInput().
 		Title("How much to convert?").
 		Value(&rateFrom),
-		Validate(func(amt int) error{
-			if amt <= 0 {
-                return fmt.Errorf("Please enter a value greater than 0")
+		Validate(func(x string) error{
+			if _, err := strconv.ParseFloat(x, 64); err != nil {
+                return fmt.Errorf("Please enter a valid value of currency")
             }
             return nil
 		}),
-	)
+	),
+
+)
+
 
 	// Run the Terminal User Interface (TUI)
 	err := form.Run()
