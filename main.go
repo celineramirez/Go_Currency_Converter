@@ -3,24 +3,26 @@ package main
 import (
 	"fmt"
 	"strconv"
-	// "net/http"
+	"net/http"
 	"github.com/charmbracelet/huh"
 	// "encoding/json"
 	"errors"
 	"os"
+	"io/ioutil"
 )
 
 var (
-	base      string
-	convertTo string
-	rateFrom  int
-	rateTo    int
-	amount    string
-	converted int
-	result    string
+	convertFrom string
+	convertTo   string
+	rateFrom    int
+	rateTo      int
+	amountStr   string
+	converted   int
+	result      string
 )
 
-func convertRates(convFrom int, currencyFrom string, currencyTo string) int {
+func convertRates(amount int, currencyFrom string, currencyTo string) int {
+	data := getConversion()
 	convFrom := data.Rates[currencyFrom]
 	convTo := data.Rates[currencyTo]
 	converted := amount * (convTo / convFrom)
@@ -28,8 +30,7 @@ func convertRates(convFrom int, currencyFrom string, currencyTo string) int {
 }
 
 func main() {
-	// apiKey := os.Getenv("CURRENCY_CONV_API_KEY")
-
+	// Make TUI form
 	form := huh.NewForm(
 		huh.NewGroup(
 			huh.NewSelect[string]().
@@ -40,7 +41,7 @@ func main() {
 					huh.NewOption("EUR", "eur"),
 					huh.NewOption("JPY", "jpy"),
 				).
-				Value(&base),
+				Value(&convertFrom),
 		),
 
 		huh.NewGroup(
@@ -53,7 +54,7 @@ func main() {
 					huh.NewOption("JPY", "jpy"),
 				).
 				Validate(func(x string) error {
-					if x == base {
+					if x == convertFrom {
 						return errors.New("cannot choose the same currency you are converting from")
 					}
 
@@ -65,23 +66,16 @@ func main() {
 		huh.NewGroup(
 			huh.NewInput().
 				Title("How much to convert?").
-				Value(&amount).
+				Value(&amountStr).
 				Validate(func(x string) error {
-					if x <= 0 {
-						return fmt.Errorf("please enter a valid amount of currency")
+					amount, e := strconv.Atoi(amountStr)
+					if e == nil || amount <= 0 {
+						fmt.Errorf("Please enter a numerical amount greater than 0")
 					}
 					return nil
 				}),
 		),
 	) // end of form
-
-	// Do the currency conversion
-	amount, e := strconv.Atoi(amount)
-	if e == nil {
-        fmt.Println(amount, e)
-    }
-	converted := convertRates(amount, base, convertTo)
-	result := fmt.Sprintf("%d", converted)
 
 	// Run the Terminal User Interface (TUI)
 	err := form.Run()
@@ -89,6 +83,15 @@ func main() {
 		fmt.Println("Unable to run currency converter")
 		os.Exit(1)
 	}
+
+	// Call currency conversion function
+	amount, e := strconv.Atoi(amountStr)
+	if e == nil {
+		fmt.Println(amount, e)
+	}
+
+	converted := convertRates(amount, convertFrom, convertTo)
+	result := fmt.Sprintf("%d", converted)
 
 	// Run form to display result
 	resultForm := huh.NewForm(
