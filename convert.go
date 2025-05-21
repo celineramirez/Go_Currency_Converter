@@ -1,36 +1,35 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
-	// "io"
-	// "log"
-	"net/http"
-	"os"
+"encoding/json"
+"fmt"
+"io"
+"net/http"
+"os"
 )
 
-func getConversion() Response {
+func getConversion() Currency {
 	apiKey := os.Getenv("CURRENCY_CONV_API_KEY")
 
-	// api call
 	url := "https://api.currencyfreaks.com/"
-    req, err := http.NewRequest("GET", url, nil)
-    if err != nil {
-        fmt.Print(err.Error())
-    }
+	response , err := http.NewRequest("GET", url, nil)
+	if err != nil {
+	    fmt.Print(err.Error())
+		os.Exit(1)
+	}
 
-	req.Header.Add("cf-api-key", apiKey)
+	response.Header.Add("cf-api-key", apiKey)
 
-	res, err := http.DefaultClient.Do(req)
-    if err != nil {
-        fmt.Print(err.Error())
-    }
+	responseData, err := io.ReadAll(response.Body)
+	if err != nil {
+	    fmt.Print(err.Error())
+	}
 
-	defer res.Body.Close()
+	var currency Currency
+	err = json.Unmarshal(responseData, &currency)
+	if err != nil {
+	    fmt.Println("Unable to unmarshal response")
+	}
 
-	body, readErr := ioutil.ReadAll(res.Body)
-    if readErr != nil {
-        fmt.Print(err.Error())
-    }
-    fmt.Println(string(body))
+	return currency
 }

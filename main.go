@@ -2,26 +2,19 @@ package main
 
 import (
 	"fmt"
-	"strconv"
-	"net/http"
 	"github.com/charmbracelet/huh"
-	// "encoding/json"
+	"strconv"
 	"errors"
 	"os"
-	"io/ioutil"
 )
 
 var (
 	convertFrom string
 	convertTo   string
-	rateFrom    int
-	rateTo      int
 	amountStr   string
-	converted   int
-	result      string
 )
 
-func convertRates(amount int, currencyFrom string, currencyTo string) int {
+func convertRates(amount float64, currencyFrom string, currencyTo string) float64 {
 	data := getConversion()
 	convFrom := data.Rates[currencyFrom]
 	convTo := data.Rates[currencyTo]
@@ -30,6 +23,7 @@ func convertRates(amount int, currencyFrom string, currencyTo string) int {
 }
 
 func main() {
+
 	// Make TUI form
 	form := huh.NewForm(
 		huh.NewGroup(
@@ -68,30 +62,30 @@ func main() {
 				Title("How much to convert?").
 				Value(&amountStr).
 				Validate(func(x string) error {
-					amount, e := strconv.Atoi(amountStr)
+					amount, e := strconv.ParseFloat(amountStr,64)
 					if e == nil || amount <= 0 {
 						fmt.Errorf("Please enter a numerical amount greater than 0")
 					}
 					return nil
 				}),
 		),
-	) // end of form
+	)
 
 	// Run the Terminal User Interface (TUI)
-	err := form.Run()
-	if err != nil {
+	err1 := form.Run()
+	if err1 != nil {
 		fmt.Println("Unable to run currency converter")
 		os.Exit(1)
 	}
 
 	// Call currency conversion function
-	amount, e := strconv.Atoi(amountStr)
+	amount, e := strconv.ParseFloat(amountStr,64)
 	if e == nil {
 		fmt.Println(amount, e)
 	}
 
 	converted := convertRates(amount, convertFrom, convertTo)
-	result := fmt.Sprintf("%d", converted)
+	result := fmt.Sprintf("%.2f", converted)
 
 	// Run form to display result
 	resultForm := huh.NewForm(
@@ -101,10 +95,10 @@ func main() {
 				CharLimit(400).
 				Value(&result),
 		),
-	) // end result form
+	)
 
-	err1 := resultForm.Run()
-	if err1 != nil {
+	err2 := resultForm.Run()
+	if err2 != nil {
 		fmt.Println("Unable to produce result")
 		os.Exit(1)
 	}
