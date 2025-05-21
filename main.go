@@ -1,11 +1,11 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"github.com/charmbracelet/huh"
-	"strconv"
-	"errors"
 	"os"
+	"strconv"
 )
 
 var (
@@ -22,6 +22,13 @@ func convertRates(amount float64, currencyFrom string, currencyTo string) float6
 	return converted
 }
 
+var currencySelect = []huh.Option[string]{
+	huh.NewOption("USD", "usd"),
+	huh.NewOption("GBP", "gbp"),
+	huh.NewOption("EUR", "eur"),
+	huh.NewOption("JPY", "jpy"),
+}
+
 func main() {
 
 	// Make TUI form
@@ -29,24 +36,14 @@ func main() {
 		huh.NewGroup(
 			huh.NewSelect[string]().
 				Title("What is your base currency?").
-				Options(
-					huh.NewOption("USD", "usd"),
-					huh.NewOption("GBP", "gbp"),
-					huh.NewOption("EUR", "eur"),
-					huh.NewOption("JPY", "jpy"),
-				).
+				Options(currencySelect...).
 				Value(&convertFrom),
 		),
 
 		huh.NewGroup(
 			huh.NewSelect[string]().
 				Title("What currency do you want to convert to?").
-				Options(
-					huh.NewOption("USD", "usd"),
-					huh.NewOption("GBP", "gbp"),
-					huh.NewOption("EUR", "eur"),
-					huh.NewOption("JPY", "jpy"),
-				).
+				Options(currencySelect...).
 				Validate(func(x string) error {
 					if x == convertFrom {
 						return errors.New("cannot choose the same currency you are converting from")
@@ -62,7 +59,7 @@ func main() {
 				Title("How much to convert?").
 				Value(&amountStr).
 				Validate(func(x string) error {
-					amount, e := strconv.ParseFloat(amountStr,64)
+					amount, e := strconv.ParseFloat(amountStr, 64)
 					if e == nil || amount <= 0 {
 						fmt.Errorf("Please enter a numerical amount greater than 0")
 					}
@@ -79,7 +76,7 @@ func main() {
 	}
 
 	// Call currency conversion function
-	amount, e := strconv.ParseFloat(amountStr,64)
+	amount, e := strconv.ParseFloat(amountStr, 64)
 	if e == nil {
 		fmt.Println(amount, e)
 	}
