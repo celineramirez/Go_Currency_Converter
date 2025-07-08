@@ -1,7 +1,7 @@
 # Go_Currency_Converter
 
 This is a currency converter in Golang that retrieves data rate values from an API: https://currencyfreaks.com/<br>
-The charmbracelet/huh TUI framework is implemented for displaying the menu options for the currency converter: https://github.com/charmbracelet/huh<br>
+The charmbracelet/huh Terminal User Interface (TUI) framework is implemented for displaying the menu options for the currency converter: https://github.com/charmbracelet/huh<br>
 
 Upon running the program, the user is prompted to input the currency they will be converting from:<br>
 ![base currency](screenshots/base_cur.png)
