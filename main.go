@@ -104,6 +104,17 @@ func main() {
 	// Call the conversion function and get result
 	converted := convertRates(amount, convertFrom, convertTo)
 	result := fmt.Sprintf("%.2f", converted)
+	
+	switch convertTo {
+	case "USD":
+		result = "$" + result
+	case "GBP":
+		result = "£" + result
+	case "EUR":
+		result = "€" + result
+	case "PKR":
+		result = "Rs " + result
+	}
 
 	// Run form to display result
 	resultForm := huh.NewForm(
