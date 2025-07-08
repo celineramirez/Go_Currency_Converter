@@ -6,6 +6,7 @@ import (
 	"github.com/charmbracelet/huh"
 	"os"
 	"strconv"
+	"log"
 )
 
 var (
@@ -14,19 +15,39 @@ var (
 	amountStr   string
 )
 
+// Retrieve rates from the API and calculate the conversion
 func convertRates(amount float64, currencyFrom string, currencyTo string) float64 {
 	data := getConversion()
-	convFrom := data.Rates[currencyFrom]
-	convTo := data.Rates[currencyTo]
-	converted := amount * (convTo / convFrom)
+
+	// fmt.Printf("Date: %s, Base: %s\n", data.Date, data.Base)
+	// fmt.Printf("Rates map: %+v\n", data.Rates)
+
+	// fill from user input decided rate
+	rateFrom := data.Rates[currencyFrom]
+	rateTo := data.Rates[currencyTo]
+
+	// Parse the string
+	convFromRate, err := strconv.ParseFloat(rateFrom, 64)
+	if err != nil {
+		log.Fatalf("Error parsing rate from: %v", err)
+	}
+
+	convToRate, err2 := strconv.ParseFloat(rateTo, 64)
+	if err2 != nil {
+		log.Fatalf("Error parsing rate from: %v", err2)
+	}
+
+	// Calculate the conversion
+	converted := amount * (convToRate / convFromRate)
 	return converted
 }
 
+// Currency Menu
 var currencySelect = []huh.Option[string]{
-	huh.NewOption("USD", "usd"),
-	huh.NewOption("GBP", "gbp"),
-	huh.NewOption("EUR", "eur"),
-	huh.NewOption("JPY", "jpy"),
+	huh.NewOption("USD", "USD"),
+	huh.NewOption("GBP", "GBP"),
+	huh.NewOption("EUR", "EUR"),
+	huh.NewOption("PKR", "PKR"),
 }
 
 func main() {
@@ -48,7 +69,6 @@ func main() {
 					if x == convertFrom {
 						return errors.New("cannot choose the same currency you are converting from")
 					}
-
 					return nil
 				}).
 				Value(&convertTo),
@@ -59,9 +79,9 @@ func main() {
 				Title("How much to convert?").
 				Value(&amountStr).
 				Validate(func(x string) error {
-					amount, e := strconv.ParseFloat(amountStr, 64)
-					if e == nil || amount <= 0 {
-						fmt.Errorf("Please enter a numerical amount greater than 0")
+					amount, e := strconv.ParseFloat(x, 64)
+					if e != nil || amount <= 0 {
+						fmt.Errorf("please enter a numerical amount greater than 0")
 					}
 					return nil
 				}),
@@ -75,12 +95,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Call currency conversion function
+	// Convert user input amount string to a numerical value
 	amount, e := strconv.ParseFloat(amountStr, 64)
-	if e == nil {
-		fmt.Println(amount, e)
+	if e != nil {
+		fmt.Printf("Invalid input %q, please enter a numerical value greater than 0\n", amountStr)
 	}
 
+	// Call the conversion function and get result
 	converted := convertRates(amount, convertFrom, convertTo)
 	result := fmt.Sprintf("%.2f", converted)
 
@@ -94,6 +115,7 @@ func main() {
 		),
 	)
 
+	// If unable to run resultForm
 	err2 := resultForm.Run()
 	if err2 != nil {
 		fmt.Println("Unable to produce result")

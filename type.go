@@ -1,7 +1,7 @@
 package main
 
 type Currency struct {
-	Date  int                `json:"date"`
+	Date  string             `json:"date"`
 	Base  string             `json:"base"`
-	Rates map[string]float64 `json:"rates"`
+	Rates map[string]string  `json:"rates"`
 }
