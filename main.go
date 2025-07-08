@@ -95,7 +95,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Convert user input amount string to a numerical value
+	// Convert user input amount string to a float
 	amount, e := strconv.ParseFloat(amountStr, 64)
 	if e != nil {
 		fmt.Printf("Invalid input %q, please enter a numerical value greater than 0\n", amountStr)
@@ -104,7 +104,7 @@ func main() {
 	// Call the conversion function and get result
 	converted := convertRates(amount, convertFrom, convertTo)
 	result := fmt.Sprintf("%.2f", converted)
-	
+
 	switch convertTo {
 	case "USD":
 		result = "$" + result
